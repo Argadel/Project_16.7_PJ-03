@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "quill-image-compress": "^2.0.2"
+  }
+}

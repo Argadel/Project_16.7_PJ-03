@@ -1,0 +1,64 @@
+{% extends 'flatpages/base.html' %}
+{% block title %}
+Notices
+{% endblock title %}
+
+{% block content %}
+   <h1>All notices to the category: <span style="color:#AA72B9">{{ view.category }}</span></h1>
+   <hr>
+   {% if category %}
+    <article class="media content-section">
+        <div class="media-body">
+            <table class="padding-table-columns">
+                <tr>
+                    <td></td>
+                    <td style="font-weight:bold">Author</td>
+                    <td style="font-weight:bold">Date</td>
+                    <td style="font-weight:bold">Title</td>
+                    <td style="font-weight:bold">Content</td>
+                </tr>
+                {% for notice in category %}
+                <tr>
+                    <td><img class="rounded-circle article-img" src="{{ notice.author.profile.image.url }}"></td>
+                    <td><p class="article-content"><a class="mr-2" style="color:#AA72B9" href="{% url 'users-notices' notice.author.username %}">{{ notice.author }}</a></p></td>
+                    <td><p class="article-content">{{ notice.date_posted|date:'d. M. Y'}}</p></td>
+                    <td><p class="article-content"><a class="mr-2" style="color:#AA72B9" href="{% url 'notice-detail' notice.id %}">{{ notice.title|truncatechars:10 }}</a></p></td>
+                    <td><p class="article-content">{{ notice.content.html|truncatechars:20|safe}}</p></td>
+                </tr>
+                {% endfor %}
+           </table>
+        </div>
+    </article>
+   {% else %}
+       <h4> No available notices yet! :( </h4>
+        {% if user.is_authenticated %}
+                <h4><a style="color: #AA72B9" href="{% url 'notice-create' %}">Be the first to create one! :)</a></h4>
+            {% else %}
+                <h4><a style="color: #AA72B9" href="{% url 'account_login' %}">Log in and create one! :)</a></h4>
+            {% endif %}
+   {% endif %}
+
+    <div class="pagination justify-content-center">
+        {% if is_paginated %}
+
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page=1">First</a>
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
+
+        {% endif %}
+    </div>
+{% endblock content %}

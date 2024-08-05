@@ -1,0 +1,78 @@
+{% extends "flatpages/base.html" %}
+{% load static %}
+{% block content %}
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ notice.author.profile.image.url }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" style="color:#AA72B9" href="{% url 'users-notices' notice.author.username %}">{{ object.author }}</a>
+        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+        <a class="mr-2" style="color:#AA72B9;" href="{% url 'category' object.category.id %}">{{ object.category }}</a>
+        {% if object.author == user %}
+          <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'notice-update' object.id %}">Edit</a>
+            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'notice-delete' object.id %}">Delete</a>
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="article-title">{{ object.title }}</h2>
+      <p class="article-content">{{ object.content.html|safe }}</p>
+      <h4 class="mb-3">Total replies (<span style="color:#AA72B9;">{{ object.notice_replies.all.count }}</span>)</h4>
+      {% if object.notice_replies.all %}
+        {% if user.is_authenticated %}
+            {% if notice.author != user %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'reply-create' object.id %}">Reply</a>
+            {% endif %}
+        {% endif %}<hr>
+        {% for reply in object.notice_replies.all %}<hr>
+        <tr>
+            <td><img class="rounded-circle article-img" src="{{ reply.commentator.profile.image.url }}"></td>
+            <td>{{ reply.commentator }}</td>
+            <td>{{ reply.date }}</td><br>
+            <td>{{ reply.reply_content }}</td><br>
+          {% if reply.commentator == user %}
+              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'reply-update' reply.id %}">Edit</a>
+              <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'reply-delete' reply.id %}">Delete</a>
+          {% endif %}
+            {% if user.is_authenticated %}
+                {% if notice.author == user %}
+                    <p class='text-center'><a href="{% url 'accepted' reply.id %}" class="btn btn-secondary btn-sm">Accept</a></p>
+                    <p class='text-center'><a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'reply-delete' reply.id %}">Reject</a></p>
+                {% endif %}
+            {% endif %}
+        </tr>
+        {% endfor %}
+      {% else %}
+       <h4 style="color:#AA72B9;">No Replies Yet!</h4>
+        {% if notice.author != user %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'reply-create' object.id %}">Be the first to reply!</a>
+                <hr>
+        {% endif %}
+   {% endif %}
+    </div>
+  </article>
+
+    <div class="pagination justify-content-center">
+        {% if is_paginated %}
+
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page=1">First</a>
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
+
+        {% endif %}
+    </div>
+{% endblock content %}
